@@ -9,20 +9,25 @@ STAGE = 1  # Nov 23: 1; Nov 24: 2; Nov 30: 3 after completing that stage.
 
 # STAGE 1 - MONDAY, NOVEMBER 23: What do the represented topics share?
 def shared_count(left, right):
-    """Return the number of distinct tags shared by two collections."""
+    left_tags = set(left)
+    right_tags = set(right)
+    matched = left_tags & right_tags
+    return len(matched)
     # Turn each collection into a set so repeated tags count once.
     # Find the tags present in both sets and return their count.
     # Leave the supplied collections unchanged.
-    raise NotImplementedError("Complete the shared-topic count.")
+    # raise NotImplementedError("Complete the shared-topic count.")
 
 
 def jaccard(left, right):
     """Return shared-tag count divided by union size, or zero for an empty union."""
-    # Represent each collection as a set.
-    # Find the shared tags and all distinct tags present in either set.
-    # If there are no tags in the union, use this assignment's zero policy.
-    # Otherwise return the shared count divided by the union count.
-    raise NotImplementedError("Complete Jaccard similarity.")
+    left_tags = set(left)
+    right_tags = set(right)
+    shared = left_tags & right_tags
+    union = left_tags | right_tags
+    if not union:
+        return 0.0
+    return len(shared) / len(union)
 
 
 # STAGE 2 - TUESDAY, NOVEMBER 24: Which references fit, and why?
