@@ -25,7 +25,14 @@ def test_stage_1_boundaries():
     # tags_for handles a resource with missing tags or tags=None as an empty set.
     # Use that supplied helper before comparing those cases with PROFILE.
     # Save independent copies of small inputs and check that neither changes.
-    raise NotImplementedError("Add stage 1 boundary and preservation checks.")
+    left = ["queues", "queues", "collections"]
+    right = ["queues", "stacks", "stacks"]
+    left_copy = deepcopy(left)
+    right_copy = deepcopy(right)
+    assert shared_count(left, right) == 1
+    assert isclose(jaccard(left, right), 1 / 3)
+    assert left == left_copy
+    assert right == right_copy
 
 
 def test_stage_2_rankings():
@@ -37,7 +44,10 @@ def test_stage_2_rankings():
     # With k=3 and equal weights, LR002 precedes the tied LR003.
     # Reverse input order in a copy; the ranked results should stay the same.
     # Compare all-one weighted scores with independently expected Jaccard scores.
-    raise NotImplementedError("Add stage 2 score, ranking and tie checks.")
+    resources_copy = deepcopy(RESOURCES)
+    results = rank_resources(resources_copy, PROFILE, WEIGHTS, 2)
+    assert results[0]["id"] == "LR013"
+    assert results[1]["id"] == "LR002"
 
 
 def test_stage_2_boundaries():
@@ -48,7 +58,11 @@ def test_stage_2_boundaries():
     # Preserve resources and nested tags, PROFILE and WEIGHTS using deepcopy.
     # Check required result fields and that changing a result does not edit input.
     # Supplied validation handles invalid weights/limits; do not build a framework.
-    raise NotImplementedError("Add stage 2 boundary and preservation checks.")
+    resources_copy = deepcopy(RESOURCES)
+    results = rank_resources(resources_copy, PROFILE, WEIGHTS, 0)
+    assert results == []
+    results = rank_resources(resources_copy, PROFILE, WEIGHTS, 100)
+    assert len(results) == len(RESOURCES)
 
 
 def test_stage_3_controlled_changes():
@@ -60,7 +74,26 @@ def test_stage_3_controlled_changes():
     # IDs, order and scores stay the same; same_recommendations compares those.
     # Reverse records and tag order in another copy: the digest stays the same.
     # The runner demonstrates these changes; add your own assertions here.
-    raise NotImplementedError("Add stage 3 snapshot and recommendation checks.")
+    resources_copy = deepcopy(RESOURCES)
+    # Remove tags only from LIMITATION_ID
+    for resource in resources_copy:
+        if resource["id"] == "LIMITATION_ID":
+            resource["tags"] = []
+    results = rank_resources(resources_copy, PROFILE, WEIGHTS, 2)
+    assert results[0]["id"] == "LR002"
+    assert results[1]["id"] == "LR003"
+
+    # Check original catalog remains unchanged
+    assert RESOURCES[0]["tags"] != []
+
+    # Change only a title in a fresh copy
+    resources_copy = deepcopy(RESOURCES)
+    for resource in resources_copy:
+        if resource["id"] == "LIMITATION_ID":
+            resource["title"] = "New Title"
+    results = rank_resources(resources_copy, PROFILE, WEIGHTS, 2)
+    assert results[0]["id"] == "LR013"
+    assert results[1]["id"] == "LR002"
 
 
 def main():
@@ -75,7 +108,6 @@ def main():
     if TEST_STAGE >= 3:
         test_stage_3_controlled_changes()
     print("Selected-stage checks passed; complete all three stages before submission.")
-
 
 if __name__ == "__main__":
     if not __debug__:
